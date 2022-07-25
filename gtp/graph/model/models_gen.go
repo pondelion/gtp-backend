@@ -2,6 +2,14 @@
 
 package model
 
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
+
+	"gorm.io/gorm"
+)
+
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
