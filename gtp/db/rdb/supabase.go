@@ -2,6 +2,7 @@ package rdb
 
 import (
 	"fmt"
+	"gtp/db/rdb/model"
 	"gtp/utils/gcp"
 	"log"
 	"os"
@@ -17,6 +18,17 @@ func SupabaseDB() (*gorm.DB, error) {
 		return supabase_db, nil
 	}
 
+	supabase_db, err := InitDB()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	Migrate(supabase_db)
+
+	return supabase_db, nil
+}
+
+func InitDB() (*gorm.DB, error) {
 	supabase_dsn := os.Getenv("SUPABASE_DB_CONNECTION_STRING_GO")
 	if supabase_dsn == "" {
 		fmt.Println("Environment variable SUPABASE_DB_CONNECTION_STRING_GO is not set, fetching secret settings SUPABASE_DB_CONNECTION_STRING_GO from GCP...")
@@ -42,5 +54,13 @@ func SupabaseDB() (*gorm.DB, error) {
 		fmt.Errorf("error initializing app: %v", err)
 	}
 	fmt.Println(supabase_db)
+
 	return supabase_db, nil
+}
+
+func Migrate(db *gorm.DB) {
+	err := db.AutoMigrate(&model.NewTodo{}, &model.Todo{}, &model.User{})
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

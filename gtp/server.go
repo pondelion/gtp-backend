@@ -6,12 +6,14 @@ import (
 	"gtp/db/rdb/model"
 	"gtp/graph"
 	"gtp/graph/generated"
+	"gtp/middleware/auth"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi"
 )
 
 const defaultPort = "8080"
@@ -42,23 +44,7 @@ func main() {
 	// }
 	// defer client.Close()
 
-	// supabase_db_uri := os.Getenv("SUPABASE_DB_URI")
-	// if supabase_db_uri == "" {
-	// 	var err error = nil
-	// 	fmt.Println("Fetching secret settings SUPABASE_DB_URI from GCP...")
-	// 	supabase_db_uri, err = gcp.GetSecret("SUPABASE_DB_URI", gcp_sa_filepath, gcp_project_id)
-	// 	if err != nil {
-	// 		log.Fatalln(err)
-	// 	}
-	// }
-	// fmt.Println(supabase_db_uri)
-
 	db, err := rdb.SupabaseDB()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = db.AutoMigrate(&model.NewTodo{}, &model.Todo{}, &model.User{})
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -75,12 +61,18 @@ func main() {
 		port = defaultPort
 	}
 
+	router := chi.NewRouter()
+	router.Use(auth.FirebaseAuth())
+
 	// srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	// http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	// http.Handle("/query", srv)
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	// log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
