@@ -17,20 +17,20 @@ func FirebaseAuth() func(http.Handler) http.Handler {
 			fmt.Println("Middleware auth")
 			header := r.Header.Get("Authorization")
 			if !strings.HasPrefix(header, "Bearer ") {
-				http.Error(w, "Invalid token", http.StatusForbidden)
+				http.Error(w, "Authorization: Bearer [TOKEN] not found in header", http.StatusForbidden)
 				return
 			}
 			ctx := r.Context()
 			idToken := strings.Split(r.Header.Get("Authorization"), " ")[1]
-			fmt.Println(idToken)
+			// fmt.Println(idToken)
 			//validate jwt token
 			auth_client, err := firebase_util.AuthClient()
 			token, err := auth_client.VerifyIDToken(ctx, idToken)
 			if err != nil {
-				http.Error(w, "Invalid token", http.StatusForbidden)
+				http.Error(w, "Firebase auth verification failed. Invalid token", http.StatusForbidden)
 				return
 			}
-			fmt.Println(token)
+			// fmt.Println(token)
 
 			// user, err := db.GetUserByDigestUID(hash(token.UID))
 			// if err != nil {

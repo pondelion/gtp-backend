@@ -1,0 +1,2 @@
+set -u
+curl "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_APP_API_KEY}" -H 'Content-Type: application/json' --data-binary "{\"email\":\"${FIREBASE_AUTH_TEST_USER_EMAIL}\",\"password\":\"${FIREBASE_AUTH_TEST_USER_PASSWORD}\",\"returnSecureToken\":true}" | jq

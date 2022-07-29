@@ -44,6 +44,8 @@ func main() {
 	// }
 	// defer client.Close()
 
+	log.Println(auth.Audience())
+
 	db, err := rdb.SupabaseDB()
 	if err != nil {
 		log.Fatalln(err)
