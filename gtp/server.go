@@ -20,32 +20,6 @@ const defaultPort = "8080"
 
 func main() {
 
-	// gcp_sa_filepath := os.Getenv("GCP_SA_CREDENTIAL_FILEPATH")
-	// if gcp_sa_filepath == "" {
-	// 	panic("GCP_SA_CREDENTIAL_FILEPATH must be set")
-	// }
-	// gcp_project_id := os.Getenv("GCP_PROJECT_ID")
-	// if gcp_project_id == "" {
-	// 	panic("GCP_PROJECT_ID must be set")
-	// }
-
-	// ctx := context.Background()
-
-	// opt := option.WithCredentialsFile(saFilepath)
-	// fmt.Println(opt)
-	// app, err := firebase.NewApp(ctx, nil, opt)
-	// if err != nil {
-	// 	fmt.Errorf("error initializing app: %v", err)
-	// }
-
-	// client, err := app.Firestore(ctx)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-	// defer client.Close()
-
-	log.Println(auth.Audience())
-
 	db, err := rdb.SupabaseDB()
 	if err != nil {
 		log.Fatalln(err)
@@ -64,7 +38,8 @@ func main() {
 	}
 
 	router := chi.NewRouter()
-	router.Use(auth.FirebaseAuth())
+	// router.Use(auth.FirebaseAuth())
+	router.Use(auth.GCIPAuth())
 
 	// srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))

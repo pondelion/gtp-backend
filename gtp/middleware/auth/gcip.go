@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	firebase_util "gtp/utils/gcp/firebase"
+	gcp_util "gtp/utils/gcp"
 )
 
-type userKey struct{}
+type GCIPUser struct{}
 
-func FirebaseAuth() func(http.Handler) http.Handler {
+func GCIPAuth() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Middleware auth")
@@ -24,24 +24,14 @@ func FirebaseAuth() func(http.Handler) http.Handler {
 			idToken := strings.Split(r.Header.Get("Authorization"), " ")[1]
 			// fmt.Println(idToken)
 			//validate jwt token
-			auth_client, err := firebase_util.AuthClient()
+			auth_client, err := gcp_util.IPAuthClient()
 			token, err := auth_client.VerifyIDToken(ctx, idToken)
 			if err != nil {
-				http.Error(w, "Firebase auth verification failed. Invalid token", http.StatusForbidden)
+				http.Error(w, "GCP Identity Provider auth verification failed. Invalid token", http.StatusForbidden)
 				return
 			}
 			fmt.Println(token)
-
-			// user, err := db.GetUserByDigestUID(hash(token.UID))
-			// if err != nil {
-			// 	http.Error(w, "Invalid token", http.StatusForbidden)
-			// 	return
-			// }
-
-			// and call the next with our new context
-			// r = r.WithContext(ctx)
-			// next.ServeHTTP(w, r)
-			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, userKey{}, token.UID)))
+			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, GCIPUser{}, token.UID)))
 		})
 	}
 }

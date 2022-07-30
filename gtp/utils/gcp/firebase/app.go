@@ -16,11 +16,21 @@ func App() (*firebase.App, error) {
 		return app, nil
 	}
 	firebase_sa_filepath := os.Getenv("FIREBASE_SA_CREDENTIAL_FILEPATH")
+	// firebase_sa_filepath := os.Getenv("GCP_SA_CREDENTIAL_FILEPATH")
 	if firebase_sa_filepath == "" {
 		panic("FIREBASE_SA_CREDENTIAL_FILEPATH must be set")
 	}
+	var err error
+	app, err = CreateApp(firebase_sa_filepath)
+	if err != nil {
+		fmt.Errorf("error initializing app: %v", err)
+	}
+	return app, nil
+}
+
+func CreateApp(sa_credential_filepath string) (*firebase.App, error) {
 	ctx := context.Background()
-	opt := option.WithCredentialsFile(firebase_sa_filepath)
+	opt := option.WithCredentialsFile(sa_credential_filepath)
 	fmt.Println(opt)
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {

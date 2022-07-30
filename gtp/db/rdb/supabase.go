@@ -3,7 +3,7 @@ package rdb
 import (
 	"fmt"
 	"gtp/db/rdb/model"
-	"gtp/utils/gcp"
+	gcp_util "gtp/utils/gcp"
 	"log"
 	"os"
 
@@ -41,7 +41,7 @@ func InitDB() (*gorm.DB, error) {
 			panic("GCP_PROJECT_ID must be set")
 		}
 		var err error = nil
-		supabase_dsn, err = gcp.GetSecret("SUPABASE_DB_CONNECTION_STRING_GO", gcp_sa_filepath, gcp_project_id)
+		supabase_dsn, err = gcp_util.GetSecret("SUPABASE_DB_CONNECTION_STRING_GO", gcp_sa_filepath, gcp_project_id)
 		if err != nil {
 			log.Fatalln(err)
 		}
