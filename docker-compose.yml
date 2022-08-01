@@ -1,0 +1,18 @@
+version: '3'
+services:
+  gtp_backend:
+    build: 
+      context: .
+      dockerfile: ./docker/Dockerfile.local
+      args:
+        - GCP_CREDENTIAL_FILE=./credentials/pj-gtp-gcp.json
+        - FIREBASE_CREDENTIAL_FILE=./credentials/pj-gtp-firebase.json
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./.env.docker
+    tty: true
+    environment:
+      - GCP_SA_CREDENTIAL_FILEPATH=/credentials/gcp_credentials.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp_credentials.json
+      - FIREBASE_SA_CREDENTIAL_FILEPATH=/credentials/firebase_credentials.json

@@ -1,0 +1,26 @@
+FROM golang:1.17-buster as builder
+
+COPY ./gtp/go.* /gtp/
+
+WORKDIR /gtp
+
+RUN go mod download
+
+COPY ./gtp/ /gtp/
+
+RUN go build -v -o server
+
+FROM debian:buster-slim
+RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+ARG GCP_CREDENTIAL_FILE
+ARG FIREBASE_CREDENTIAL_FILE
+
+COPY $GCP_CREDENTIAL_FILE /credentials/gcp_credentials.json
+COPY $FIREBASE_CREDENTIAL_FILE /credentials/firebase_credentials.json
+
+COPY --from=builder /gtp/server /gtp/server
+
+CMD ["/gtp/server"]

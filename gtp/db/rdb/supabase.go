@@ -32,16 +32,18 @@ func InitDB() (*gorm.DB, error) {
 	supabase_dsn := os.Getenv("SUPABASE_DB_CONNECTION_STRING_GO")
 	if supabase_dsn == "" {
 		fmt.Println("Environment variable SUPABASE_DB_CONNECTION_STRING_GO is not set, fetching secret settings SUPABASE_DB_CONNECTION_STRING_GO from GCP...")
-		gcp_sa_filepath := os.Getenv("GCP_SA_CREDENTIAL_FILEPATH")
-		if gcp_sa_filepath == "" {
-			panic("GCP_SA_CREDENTIAL_FILEPATH must be set")
-		}
+
 		gcp_project_id := os.Getenv("GCP_PROJECT_ID")
 		if gcp_project_id == "" {
 			panic("GCP_PROJECT_ID must be set")
 		}
 		var err error = nil
-		supabase_dsn, err = gcp_util.GetSecret("SUPABASE_DB_CONNECTION_STRING_GO", gcp_sa_filepath, gcp_project_id)
+		gcp_sa_filepath := os.Getenv("GCP_SA_CREDENTIAL_FILEPATH")
+		if gcp_sa_filepath == "" {
+			supabase_dsn, err = gcp_util.GetSecret("SUPABASE_DB_CONNECTION_STRING_GO", gcp_project_id, nil)
+		} else {
+			supabase_dsn, err = gcp_util.GetSecret("SUPABASE_DB_CONNECTION_STRING_GO", gcp_project_id, &gcp_sa_filepath)
+		}
 		if err != nil {
 			log.Fatalln(err)
 		}

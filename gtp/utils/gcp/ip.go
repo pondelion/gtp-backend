@@ -17,12 +17,17 @@ func App() (*firebase.App, error) {
 	if app != nil {
 		return app, nil
 	}
-	gcp_sa_filepath := os.Getenv("GCP_SA_CREDENTIAL_FILEPATH")
-	if gcp_sa_filepath == "" {
-		panic("GCP_SA_CREDENTIAL_FILEPATH must be set")
-	}
 	var err error
-	app, err = firebase_util.CreateApp(gcp_sa_filepath)
+	gcp_deployed, _ := GCPDeployed()
+	if gcp_deployed {
+		app, err = firebase_util.CreateApp(nil)
+	} else {
+		gcp_sa_filepath := os.Getenv("GCP_SA_CREDENTIAL_FILEPATH")
+		if gcp_sa_filepath == "" {
+			panic("GCP_SA_CREDENTIAL_FILEPATH must be set")
+		}
+		app, err = firebase_util.CreateApp(&gcp_sa_filepath)
+	}
 	if err != nil {
 		fmt.Errorf("error initializing app: %v", err)
 	}

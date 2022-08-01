@@ -9,10 +9,16 @@ import (
 	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
 )
 
-func GetSecret(name string, saFilepath string, projectId string) (string, error) {
+func GetSecret(name string, projectId string, saFilepath *string) (string, error) {
 	// Create the client.
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx, option.WithCredentialsFile(saFilepath))
+	var err error
+	var client *secretmanager.Client
+	if saFilepath == nil {
+		client, err = secretmanager.NewClient(ctx)
+	} else {
+		client, err = secretmanager.NewClient(ctx, option.WithCredentialsFile(*saFilepath))
+	}
 	if err != nil {
 		return "", fmt.Errorf("failed to create secretmanager client: %v", err)
 	}
